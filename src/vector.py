@@ -16,8 +16,7 @@ class Vector:
             raise TypeError('The coordinates must be iterable')
 
     def __repr__(self):
-        coords = ', '.join(str(c) for c in self.coordinates)
-        return 'Vector({})'.format(coords)
+        return f'Vector{self.__format__()}'
 
     def __eq__(self, v):
         return self.coordinates == v.coordinates
@@ -35,9 +34,10 @@ class Vector:
         return self * scalar
 
     def __format__(self, format_spec=''):
-        specifiers = '{}, ' * (self.dimension - 1) + '{}'
-        components = (format(c, format_spec) for c in self.coordinates)
-        return '({})'.format(specifiers.format(*components))
+        specifier = '{:.3f}'
+        specifiers = f'{specifier}, ' * (self.dimension - 1) + specifier
+        formatted = specifiers.format(*self.coordinates)
+        return f'({formatted})'
 
     def __abs__(self):
         """Compute the Vector magnitude
@@ -89,15 +89,15 @@ class Vector:
 if __name__ == '__main__':
     v1 = Vector([8.218, -9.341])
     v2 = Vector([-1.129, 2.111])
-    print('Addition: Vector{:.3f}'.format(v1 + v2))
+    print('Addition: {!r}'.format(v1 + v2))
 
     v3 = Vector([7.119, 8.215])
     v4 = Vector([-8.223, 0.878])
-    print('\nSubtraction: Vector{:.3f}'.format(v3 - v4))
+    print('\nSubtraction: {!r}'.format(v3 - v4))
 
     v5 = Vector([1.671, -1.012, -0.318])
     scalar = 7.41
-    print('\nMultiplication: Vector{:.3f}'.format(scalar * v5))
+    print('\nMultiplication: {!r}'.format(scalar * v5))
 
     v6 = Vector([-0.221, 7.437])
     v7 = Vector([8.813, -1.331, -6.247])
@@ -108,8 +108,8 @@ if __name__ == '__main__':
     v8 = Vector([5.581, -2.136])
     v9 = Vector([1.996, 3.108, -4.554])
     print('\nDirection (Normalization):')
-    print('{!r}.normalize() => Vector{:.3f}'.format(v8, v8.normalize()))
-    print('{!r}.normalize() => Vector{:.3f}'.format(v9, v9.normalize()))
+    print('{!r}.normalize() => {!r}'.format(v8, v8.normalize()))
+    print('{!r}.normalize() => {!r}'.format(v9, v9.normalize()))
 
     print('\nDot Products:')
     v10 = Vector([7.887, 4.138])
