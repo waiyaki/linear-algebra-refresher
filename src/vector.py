@@ -85,6 +85,25 @@ class Vector:
             rads = math.acos(uv.dot(uw))
             return math.degrees(rads) if degrees else rads
 
+    def is_parallel(self, other):
+        """Determine whether a vector is parallel to another vector."""
+        chain = list(zip(self.coordinates, other.coordinates))
+        divs = {'{:.3f}'.format(b / a) for a, b in chain}
+        if len(divs) > 1:
+            divs = {'{:.3f}'.format(a / b) for a, b in chain}
+        return len(divs) == 1
+
+    def is_orthogonal(self, other, tolerance=1e-10):
+        """Determine if a vector is orthogonal to another vector."""
+        return abs(self.dot(other)) < tolerance
+
+    def is_zero(self, tolerance=1e-10):
+        return abs(self) < tolerance
+
+    def is_parallel_instructor_implementation(self, other):
+        """Determine whether a vector is parallel to another vector."""
+        return self.is_zero() or v.is_zero() or self.angle(v, degrees=True) in (0, 180)
+
 
 if __name__ == '__main__':
     v1 = Vector([8.218, -9.341])
@@ -128,3 +147,17 @@ if __name__ == '__main__':
     v16 = Vector([7.35, 0.221, 5.188])
     v17 = Vector([2.751, 8.259, 3.985])
     print('{!r}.angle({!r}) = {:.3f} degrees'.format(v16, v17, v16.angle(v17, degrees=True)))
+
+    print('\nparallel and orthogonal:')
+    v18s = [
+        Vector([-7.579, -7.88]), Vector([-2.029, 9.97, 4.172]),
+        Vector([-2.328, -7.284, -1.214]), Vector([2.118, 4.827])
+    ]
+    v19s = [
+        Vector([22.737, 23.64]), Vector([-9.231, -6.639, -7.245]),
+        Vector([-1.821, 1.072, -2.94]), Vector([0, 0])
+    ]
+    for index, (a, b) in enumerate(zip(v18s, v19s)):
+        print('{!r} and {!r}'.format(a, b))
+        print('\tparallel: {}'.format(a.is_parallel(b)))
+        print('\torthogonal: {}'.format(a.is_orthogonal(b)))
