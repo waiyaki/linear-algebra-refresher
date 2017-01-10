@@ -86,7 +86,10 @@ class Vector:
             return math.degrees(rads) if degrees else rads
 
     def is_parallel(self, other):
-        """Determine whether a vector is parallel to another vector."""
+        """Determine whether a vector is parallel to another vector.
+
+        Two vectors are parallel if one is a scalar multiple of the other.
+        """
         chain = list(zip(self.coordinates, other.coordinates))
         divs = {'{:.3f}'.format(b / a) for a, b in chain}
         if len(divs) > 1:
@@ -94,15 +97,68 @@ class Vector:
         return len(divs) == 1
 
     def is_orthogonal(self, other, tolerance=1e-10):
-        """Determine if a vector is orthogonal to another vector."""
-        return abs(self.dot(other)) < tolerance
+        """Determine if a vector is orthogonal to another vector.
+
+        A vector is orthogonal to another vector is their dot product is 0.
+        """
+        return math.isclose(self.dot(other), 0, abs_tol=tolerance)
 
     def is_zero(self, tolerance=1e-10):
-        return abs(self) < tolerance
+        return math.isclose(abs(self), 0, abs_tol=tolerance)
 
     def is_parallel_instructor_implementation(self, other):
-        """Determine whether a vector is parallel to another vector."""
-        return self.is_zero() or v.is_zero() or self.angle(v, degrees=True) in (0, 180)
+        """Determine whether a vector is parallel to another vector.
+
+        Two vectors are parallel if one is a scalar multiple of the other.
+
+        Two vectors are parallel if neither of them is a zero vector and the
+        angle between them is either 0 or pi radians.
+        """
+        return self.is_zero() or v.is_zero() or round(self.angle(v, degrees=True), 2) in (0, 180)
+
+    def projection(self, b):
+        """Compute the projection of Vector v onto Vector b.
+
+        If V and B are two vectors:
+            Taking B to be the basis vector and assuming the
+            angle θ between V and B <= 90 degrees and Ub
+            is the normalization of Vector b, then the projection
+            V|| (V parallel) of V onto B is
+
+                V|| = V.dot(Ub) * Ub
+        """
+        try:
+            norm_b = b.normalize()
+        except ValueError as e:
+            if 'Cannot normalize a zero vector' in str(e):
+                message = f'No unique parallel component to zero vector {repr(b)}'
+                raise ValueError(message) from e
+            raise
+        else:
+            return self.dot(norm_b) * norm_b
+
+    def orthogonal_component(self, b):
+        """Compute the component orthogonal to a given basis vector
+
+        If V and B are two vectors:
+            Taking B to be the basis vector and assuming the
+            angle θ between V and B is <= 90 deg, then
+            vector V can be expressed as the sum of two vectors
+            V|| (V parallel) and V┴ (V perp) where V|| is the projection of
+            V onto B and V┴ is the component of V orthogonal to the basis
+            vector B.
+
+                V = V|| + V┴
+            =>
+                V┴ = V - V||
+        """
+        try:
+            return self - self.projection(b)
+        except ValueError as e:
+            if 'No unique parallel component' in str(e):
+                message = f'No unique orthogonal component to zero vector {repr(b)}'
+                raise ValueError(message) from e
+            raise
 
 
 if __name__ == '__main__':
@@ -161,3 +217,21 @@ if __name__ == '__main__':
         print('{!r} and {!r}'.format(a, b))
         print('\tparallel: {}'.format(a.is_parallel(b)))
         print('\torthogonal: {}'.format(a.is_orthogonal(b)))
+
+    print('\nProjection:')
+    v20 = Vector([3.039, 1.879])
+    v21 = Vector([0.825, 2.036])
+    print(f'{repr(v20)}.projection({repr(v21)})')
+    print(f'\t= {repr(v20.projection(v21))}')
+
+    print('\nPerpendicular Component:')
+    v22 = Vector([-9.88, -3.264, -8.159])
+    v23 = Vector([-2.155, -9.353, -9.473])
+    print(f'{repr(v22)}.orthogonal_component({repr(v23)})')
+    print(f'\t= {repr(v22.orthogonal_component(v23))}')
+
+    v24 = Vector([3.009, -6.172, 3.692, -2.51])
+    v25 = Vector([6.404, -9.144, 2.759, 8.718])
+    print(f'\nFind V|| and V┴ given V = {repr(v24)} and basis B = {repr(v25)}')
+    print(f'V|| = {repr(v24.projection(v25))}')
+    print(f'V┴ = {repr(v24.orthogonal_component(v25))}')
